@@ -6,12 +6,16 @@ CLASS:                       ( scheduled )
 LIBRARY DEPENDENCY:          ( VS.o )
 PROGRAMMERS:                 ( (Lindsay Landry) (L3) (9-12-2013) )
 *******************************************************************************/
-#include <iostream>
 #include "../include/VS.hh"
+#include "sim_services/VariableServer/include/VariableServer.hh"
+#include "sim_services/UnitTest/include/trick_tests.h"
 
-int VSTest::shutdown() {
+int VSTest::test() {
 
-	tc_disconnect(&bob);
+	var_ascii();
+
+
 
 	return(0);
 }
+

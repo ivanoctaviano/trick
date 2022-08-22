@@ -7,24 +7,23 @@
 #include "trick/exec_proto.h"
 
 int Trick::VariableServerThread::copy_sim_data() {
-    return copy_sim_data(vars, true);
-}
 
-int Trick::VariableServerThread::copy_sim_data(std::vector<VariableReference *> given_vars, bool cyclical) {
+    unsigned int ii ;
+    VariableReference * curr_var ;
 
-    if (given_vars.size() == 0) {
-        return 0;
+    if ( vars.size() == 0 ) {
+        return 0 ;
     }
 
     if ( pthread_mutex_trylock(&copy_mutex) == 0 ) {
 
         // Get the simulation time we start this copy
-        if (cyclical) {
-            time = (double)exec_get_time_tics() / exec_get_time_tic_value() ;
-        }
+        time = (double)exec_get_time_tics() / exec_get_time_tic_value() ;
 
-        for (auto curr_var : given_vars ) {
+        for ( ii = 0 ; ii < vars.size() ; ii++ ) {
+            curr_var = vars[ii] ;
 
+            // if this variable is unresolved, try to resolve it
             if (curr_var->ref->address == &bad_ref_int) {
                 REF2 *new_ref = ref_attributes(curr_var->ref->reference);
                 if (new_ref != NULL) {
@@ -46,9 +45,9 @@ int Trick::VariableServerThread::copy_sim_data(std::vector<VariableReference *> 
                     // any of the memory blocks it knows of.  Don't do this if we have a std::string or
                     // wstring type, or we already are pointing to a bad ref.
                     if ( (curr_var->string_type != TRICK_STRING) and
-                            (curr_var->string_type != TRICK_WSTRING) and
-                            (curr_var->ref->address != &bad_ref_int) and
-                            (get_alloc_info_of(curr_var->address) == NULL) ) {
+                         (curr_var->string_type != TRICK_WSTRING) and
+                         (curr_var->ref->address != &bad_ref_int) and
+                         (get_alloc_info_of(curr_var->address) == NULL) ) {
                         std::string save_name(curr_var->ref->reference) ;
                         free(curr_var->ref) ;
                         curr_var->ref = make_error_ref(save_name) ;
@@ -93,13 +92,14 @@ int Trick::VariableServerThread::copy_sim_data(std::vector<VariableReference *> 
         }
 
         // Indicate that sim data has been written and is now ready in the buffer_in's of the vars variable list.
-        if (cyclical) {
-            var_data_staged = true;
-            packets_copied++ ;
-        }
+        var_data_staged = true;
+        packets_copied++ ;
 
         pthread_mutex_unlock(&copy_mutex) ;
     }
 
-    return 0;
+
+    return (0) ;
+
 }
+
